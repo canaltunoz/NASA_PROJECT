@@ -9,7 +9,7 @@ const Launch = props => {
     );
   }, [props.planets]);
 
-  const today = new Date().toISOString().split("T")[0];
+  const today = new Date().toUTCString().split("T")[0];
 
   return <Appear id="launch" animate show={props.entered}>
     <Paragraph>Schedule a mission launch for interstellar travel to one of the Kepler Exoplanets.</Paragraph>

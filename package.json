@@ -4,16 +4,20 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "install-server":"npm install --prefix server",
-    "install-client":"npm install --prefix client",
-    "install":"npm run install-server && npm run install-client",
-    "server":"npm run watch --prefix server  ",
-    "client":"npm start --prefix client ",
-    "watch":"concurrently 'npm:server' 'npm:client' ",
-    "deploy":"npm run build --prefix client && npm start --prefix server",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "install-server": "npm install --prefix server",
+    "install-client": "npm install --prefix client",
+    "install": "npm run install-server && npm run install-client",
+    "server": "npm run watch --prefix server  ",
+    "client": "npm start --prefix client ",
+    "watch": "concurrently 'npm:server' 'npm:client' ",
+    "deploy": "npm run build --prefix client && npm start --prefix server",
+    "test": "npm test --prefix server && npm test --prefix client"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "ajv": "^8.11.0",
+    "ajv-formats": "^2.1.1"
+  }
 }
