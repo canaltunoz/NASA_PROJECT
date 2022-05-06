@@ -1,4 +1,6 @@
-const { getAllLaunches, addNewLaunch, exitstsLaunchWithId, abortLaunchById, } = require('../../models/launches.model');
+// const { getAllLaunches, addNewLaunch, exitstsLaunchWithId, abortLaunchById, } = require('../../models/launches.model');
+const { getAllLaunches, exitstsLaunchWithId, abortLaunchById, scheduleNewLaunch, } = require('../../models/launches.model');
+const { getPagination,} = require('../../services/query');
 const Ajv = require("ajv");
 const addFormats = require("ajv-formats");
 const { response } = require('../../app');
@@ -11,7 +13,7 @@ const schema = {
         mission: { type: "string" },
         rocket: { type: "string" },
         target: { type: "string" },
-        launchDate: { type: "string", format: "date-time" }
+        launchDate: { type: "string" }
     },
     required: ["mission", "rocket", "target", "launchDate"],
     additionalProperties: false,
@@ -21,38 +23,46 @@ const schema = {
 
 const validate = ajv.compile(schema);
 
-function httpGetAllLaunches(req, res) {
+async function httpGetAllLaunches(req, res) {
     //200 leri otomatik olarak zaten dönüyor.Diğer status code ları set etmek lazm...
-    return res.status(200).json(getAllLaunches());
+    // console.log(req.query);
+    const { skip, limit} = getPagination(req.query);
+    const launches = await getAllLaunches(skip,limit);
+    return res.status(200).json(launches);
 }
 
-function httpAddNewLaunch(req, res) {
-
+async function httpAddNewLaunch(req, res) {
+    console.log(req.body);
     const launch = req.body;
+
     const valid = validate(launch);
     if (!valid)
         return res.status(400).json({
             error: 'Bad request : Missing property',
         });
-
     launch.launchDate = new Date(launch.launchDate);
-    addNewLaunch(launch);
+    // addNewLaunch(launch);
+    await scheduleNewLaunch(launch);
     return res.status(201).json(launch);
 
 }
-function httpAbortLaunch(req, res) {
+async function httpAbortLaunch(req, res) {
 
     const launchId = Number(req.params.id);
-    //
-    if (!exitstsLaunchWithId(launchId)) {
+    const existsLaunch = await exitstsLaunchWithId(launchId);
+    if (!existsLaunch) {
         response.status(404).json({
             error: 'Launch not found'
         });
     }
 
-    const aborted = abortLaunchById(launchId);
-
-    return res.status(200).json(aborted);
+    const aborted = await abortLaunchById(launchId);
+    if (!aborted) {
+        return res.status(400).json({
+            error: 'Launch not aborted',
+        });
+    }
+    return res.status(200).json({ ok: true });
 
 }
 module.exports = {
